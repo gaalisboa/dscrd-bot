@@ -1,9 +1,19 @@
 require('dotenv').config();
 const fs = require('fs');
 const { Client, GatewayIntentBits, Collection } = require('discord.js');
+const { Player } = require('discord-player');
+const { DefaultExtractors } = require('@discord-player/extractor');
+const playdl = require("play-dl");
+
+const ffmpeg = require('@ffmpeg-installer/ffmpeg');
+process.env.FFMPEG_PATH = ffmpeg.path;
 
 const client = new Client({
-    intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent]
+    intents: [
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildVoiceStates,
+        GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.MessageContent]
 });
 
 client.commands = new Collection();
@@ -19,6 +29,29 @@ client.once('ready', () => {
     console.log(`🤖 Bot ${client.user.tag} está online!`);
 });
 
+// VOICE SECTION
+const player = new Player(client, {
+    ytdlOptions: {
+        quality: "highestaudio",
+        highWaterMark: 1 << 25
+    }
+});
+
+client.player = player;
+
+// Configurando play-dl como extractor
+async function loadExtractors() {
+    await player.extractors.loadMulti(DefaultExtractors); // Certifica-se de carregar os extractors padrão
+    console.log("Extractors carregados!");
+}
+
+loadExtractors();
+
+client.once('ready', () => {
+    console.log(`🎵 Bot ${client.user.tag} está pronto para tocar música!`);
+});
+
+// MESSAGE EVENT TRIGGER
 client.on('messageCreate', message => {
     if (!message.content.startsWith('!') || message.author.bot) return;
 
@@ -31,8 +64,8 @@ client.on('messageCreate', message => {
     }
 });
 
+// DB SECTION
 const db = require('./database');
-
 client.on('messageCreate', message => {
     if (message.author.bot) return;
 
