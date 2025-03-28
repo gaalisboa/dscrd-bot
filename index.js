@@ -2,7 +2,7 @@ require('dotenv').config();
 const fs = require('fs');
 const { Client, GatewayIntentBits, Collection } = require('discord.js');
 const { Player } = require('discord-player');
-const { DefaultExtractors } = require('@discord-player/extractor');
+const { DefaultExtractors, SpotifyExtractor } = require('@discord-player/extractor');
 const playdl = require("play-dl");
 
 const ffmpeg = require('@ffmpeg-installer/ffmpeg');
@@ -37,11 +37,21 @@ const player = new Player(client, {
     }
 });
 
+// const { YouTubeExtractor } = require("@discord-player/extractor");
+
+// async function loadExtractors() {
+//     await player.extractors.register(YouTubeExtractor);
+//     console.log("Extractor do YouTube carregado!");
+// }
+
+// loadExtractors();
+
 client.player = player;
 
 // Configurando play-dl como extractor
 async function loadExtractors() {
-    await player.extractors.loadMulti(DefaultExtractors); // Certifica-se de carregar os extractors padrão
+    player.extractors.register(SpotifyExtractor)
+    // await player.extractors.loadMulti(DefaultExtractors); // Certifica-se de carregar os extractors padrão
     console.log("Extractors carregados!");
 }
 
